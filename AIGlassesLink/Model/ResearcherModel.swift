@@ -1,12 +1,19 @@
 import CoreGraphics
 import Foundation
 
+struct ResearcherLatencyMetrics: Equatable {
+    var last = "--"
+    var median = "--"
+    var p95 = "--"
+    var completedTurnCount = 0
+}
+
 @MainActor
 final class ResearcherModel: ObservableObject {
     @Published private(set) var cameraImage: CGImage?
     @Published private(set) var partialTranscript = ""
     @Published private(set) var finalTranscript = ""
-    @Published private(set) var latencySummary = "Waiting for metrics"
+    @Published private(set) var latencyMetrics = ResearcherLatencyMetrics()
     @Published private(set) var initializationSummary = ""
     @Published private(set) var lastError: String?
 
@@ -53,7 +60,8 @@ final class ResearcherModel: ObservableObject {
         }
         client.onMetrics = { [weak self] data in
             Task { @MainActor in
-                self?.latencySummary = Self.formatMetrics(data)
+                guard let metrics = Self.decodeMetrics(data) else { return }
+                self?.latencyMetrics = metrics
             }
         }
         client.onError = { [weak self] error in
@@ -77,31 +85,64 @@ final class ResearcherModel: ObservableObject {
         }
     }
 
-    private static func formatMetrics(_ data: Data) -> String {
-        guard let object = try? JSONSerialization.jsonObject(with: data) else {
-            return String(data: data, encoding: .utf8) ?? "Metrics unavailable"
+    private static func decodeMetrics(_ data: Data) -> ResearcherLatencyMetrics? {
+        guard let response = try? JSONDecoder().decode(MetricsResponse.self, from: data) else {
+            return nil
         }
-
-        var entries: [String] = []
-        flattenMetrics(object, path: [], into: &entries)
-        return entries.prefix(8).joined(separator: "\n").isEmpty
-            ? "No latency samples"
-            : entries.prefix(8).joined(separator: "\n")
+        return ResearcherLatencyMetrics(
+            last: formatMilliseconds(
+                response.latestCompletedTurn?.speechEndToFirstI2SMS
+            ),
+            median: response.display?.median?.text
+                ?? formatMilliseconds(response.rollingMedianMS),
+            p95: response.display?.p95?.text
+                ?? formatMilliseconds(response.p95MS),
+            completedTurnCount: response.completedCount ?? 0
+        )
     }
 
-    private static func flattenMetrics(_ value: Any, path: [String], into entries: inout [String]) {
-        if let dictionary = value as? [String: Any] {
-            for key in dictionary.keys.sorted() {
-                flattenMetrics(dictionary[key] as Any, path: path + [key], into: &entries)
-            }
-        } else if let array = value as? [Any] {
-            for (index, item) in array.enumerated() {
-                flattenMetrics(item, path: path + [String(index)], into: &entries)
-            }
-        } else if let number = value as? NSNumber {
-            entries.append("\(path.joined(separator: ".")): \(number)")
-        } else if let string = value as? String {
-            entries.append("\(path.joined(separator: ".")): \(string)")
-        }
+    private static func formatMilliseconds(_ value: Double?) -> String {
+        guard let value else { return "--" }
+        return "\(Int(value.rounded())) ms"
     }
+}
+
+private struct MetricsResponse: Decodable {
+    let latestCompletedTurn: CompletedTurn?
+    let rollingMedianMS: Double?
+    let p95MS: Double?
+    let completedCount: Int?
+    let display: MetricsDisplay?
+
+    enum CodingKeys: String, CodingKey {
+        case latestCompletedTurn = "latest_completed_turn"
+        case rollingMedianMS = "rolling_median_ms"
+        case p95MS = "p95_ms"
+        case completedCount = "completed_count"
+        case display
+    }
+}
+
+private struct CompletedTurn: Decodable {
+    let speechEndToFirstI2SMS: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case speechEndToFirstI2SMS = "speech_end_to_first_i2s_ms"
+    }
+}
+
+private struct MetricsDisplay: Decodable {
+    let backendTotal: DisplayMetric?
+    let median: DisplayMetric?
+    let p95: DisplayMetric?
+
+    enum CodingKeys: String, CodingKey {
+        case backendTotal = "backend_total"
+        case median
+        case p95
+    }
+}
+
+private struct DisplayMetric: Decodable {
+    let text: String?
 }

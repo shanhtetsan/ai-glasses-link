@@ -68,13 +68,30 @@ struct ResearcherView: View {
     private var latencyCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Latency metrics", systemImage: "timer").font(.headline)
-            Text(researcher.latencySummary)
-                .font(.callout.monospacedDigit())
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .textSelection(.enabled)
-                .accessibilityLabel("Latency metrics. \(researcher.latencySummary)")
+            HStack(spacing: 8) {
+                latencyTile(title: "Last", value: researcher.latencyMetrics.last)
+                latencyTile(title: "Median", value: researcher.latencyMetrics.median)
+                latencyTile(title: "P95", value: researcher.latencyMetrics.p95)
+            }
+            Text("\(researcher.latencyMetrics.completedTurnCount) turns")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .researcherCard()
+    }
+
+    private func latencyTile(title: String, value: String) -> some View {
+        VStack(spacing: 5) {
+            Text(title).font(.caption).foregroundStyle(.secondary)
+            Text(value).font(.headline.monospacedDigit())
+        }
+        .frame(maxWidth: .infinity, minHeight: 62)
+        .background(
+            Color(.tertiarySystemGroupedBackground),
+            in: RoundedRectangle(cornerRadius: 10)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title) latency, \(value)")
     }
 
     private var directLinkCard: some View {

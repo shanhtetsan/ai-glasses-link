@@ -1,3 +1,4 @@
+import AVFoundation
 import SwiftUI
 
 struct SettingsView: View {
@@ -19,22 +20,22 @@ struct SettingsView: View {
 
                 Section("Speaking rate") {
                     VStack(alignment: .leading, spacing: 8) {
+                        Text(rateMultiplierText)
+                            .font(.title3.bold().monospacedDigit())
+                            .frame(maxWidth: .infinity)
                         HStack {
                             Text("Slower")
                             Spacer()
-                            Text(settings.speakingRate.formatted(.number.precision(.fractionLength(2))))
-                                .monospacedDigit()
+                            Text("Normal")
                             Spacer()
                             Text("Faster")
                         }
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        Slider(value: $settings.speakingRate, in: 0.3...0.6, step: 0.01)
+                        Slider(value: rateSliderPosition, in: 0...1)
                             .frame(minHeight: 44)
                             .accessibilityLabel("Speaking rate")
-                            .accessibilityValue(
-                                settings.speakingRate.formatted(.number.precision(.fractionLength(2)))
-                            )
+                            .accessibilityValue(rateAccessibilityValue)
                     }
                 }
 
@@ -55,5 +56,42 @@ struct SettingsView: View {
             return "No supported voice selected"
         }
         return "\(voice.name), \(voice.language)"
+    }
+
+    private var rateSliderPosition: Binding<Double> {
+        Binding(
+            get: { sliderPosition(for: settings.speakingRate) },
+            set: { settings.speakingRate = nativeRate(for: $0) }
+        )
+    }
+
+    private var rateMultiplierText: String {
+        (settings.speakingRate / normalRate)
+            .formatted(.number.precision(.fractionLength(1))) + "x"
+    }
+
+    private var rateAccessibilityValue: String {
+        abs(settings.speakingRate - normalRate) < 0.005
+            ? "\(rateMultiplierText), Normal"
+            : rateMultiplierText
+    }
+
+    private var minimumRate: Double { 0.3 }
+    private var normalRate: Double { Double(AVSpeechUtteranceDefaultSpeechRate) }
+    private var maximumRate: Double { 0.6 }
+
+    private func sliderPosition(for nativeRate: Double) -> Double {
+        if nativeRate <= normalRate {
+            return 0.5 * (nativeRate - minimumRate) / (normalRate - minimumRate)
+        }
+        return 0.5 + 0.5 * (nativeRate - normalRate) / (maximumRate - normalRate)
+    }
+
+    private func nativeRate(for sliderPosition: Double) -> Double {
+        let position = min(max(sliderPosition, 0), 1)
+        if position <= 0.5 {
+            return minimumRate + (normalRate - minimumRate) * (position / 0.5)
+        }
+        return normalRate + (maximumRate - normalRate) * ((position - 0.5) / 0.5)
     }
 }
