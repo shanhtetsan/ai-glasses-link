@@ -24,6 +24,22 @@
 		C00000000000000000000012 /* ThermalCanonicalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000002 /* ThermalCanonicalizerTests.swift */; };
 		C00000000000000000000013 /* FrameRateCounterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000003 /* FrameRateCounterTests.swift */; };
 		C00000000000000000000014 /* ThermalRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000004 /* ThermalRendererTests.swift */; };
+		C00000000000000000000020 /* AudioSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000010 /* AudioSessionController.swift */; };
+		C00000000000000000000021 /* MicrophoneCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000011 /* MicrophoneCapture.swift */; };
+		C00000000000000000000022 /* PacedAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000012 /* PacedAudioPlayer.swift */; };
+		C00000000000000000000023 /* ConversationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000013 /* ConversationClient.swift */; };
+		C00000000000000000000024 /* ConversationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000014 /* ConversationModel.swift */; };
+		C00000000000000000000025 /* HapticFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000015 /* HapticFeedback.swift */; };
+		C00000000000000000000026 /* ConversationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000016 /* ConversationSettings.swift */; };
+		C00000000000000000000027 /* ResearcherClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000017 /* ResearcherClient.swift */; };
+		C00000000000000000000028 /* ResearcherModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000018 /* ResearcherModel.swift */; };
+		C00000000000000000000029 /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000019 /* SessionView.swift */; };
+		C0000000000000000000002A /* ResearcherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001A /* ResearcherView.swift */; };
+		C0000000000000000000002B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001B /* SettingsView.swift */; };
+		C00000000000000000000030 /* AudioChunkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000010 /* AudioChunkingTests.swift */; };
+		C00000000000000000000031 /* ConversationProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000011 /* ConversationProtocolTests.swift */; };
+		C00000000000000000000032 /* JitterBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000012 /* JitterBufferTests.swift */; };
+		C00000000000000000000033 /* TurnIDSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000013 /* TurnIDSequenceTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,10 +67,26 @@
 		A0000000000000000000000C /* ThermalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalRenderer.swift; sourceTree = "<group>"; };
 		A0000000000000000000000D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A0000000000000000000000E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A00000000000000000000010 /* AudioSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionController.swift; sourceTree = "<group>"; };
+		A00000000000000000000011 /* MicrophoneCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneCapture.swift; sourceTree = "<group>"; };
+		A00000000000000000000012 /* PacedAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacedAudioPlayer.swift; sourceTree = "<group>"; };
+		A00000000000000000000013 /* ConversationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationClient.swift; sourceTree = "<group>"; };
+		A00000000000000000000014 /* ConversationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationModel.swift; sourceTree = "<group>"; };
+		A00000000000000000000015 /* HapticFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticFeedback.swift; sourceTree = "<group>"; };
+		A00000000000000000000016 /* ConversationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationSettings.swift; sourceTree = "<group>"; };
+		A00000000000000000000017 /* ResearcherClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearcherClient.swift; sourceTree = "<group>"; };
+		A00000000000000000000018 /* ResearcherModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearcherModel.swift; sourceTree = "<group>"; };
+		A00000000000000000000019 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
+		A0000000000000000000001A /* ResearcherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearcherView.swift; sourceTree = "<group>"; };
+		A0000000000000000000001B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B00000000000000000000001 /* IncomingMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingMessageTests.swift; sourceTree = "<group>"; };
 		B00000000000000000000002 /* ThermalCanonicalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalCanonicalizerTests.swift; sourceTree = "<group>"; };
 		B00000000000000000000003 /* FrameRateCounterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameRateCounterTests.swift; sourceTree = "<group>"; };
 		B00000000000000000000004 /* ThermalRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalRendererTests.swift; sourceTree = "<group>"; };
+		B00000000000000000000010 /* AudioChunkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioChunkingTests.swift; sourceTree = "<group>"; };
+		B00000000000000000000011 /* ConversationProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationProtocolTests.swift; sourceTree = "<group>"; };
+		B00000000000000000000012 /* JitterBufferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JitterBufferTests.swift; sourceTree = "<group>"; };
+		B00000000000000000000013 /* TurnIDSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurnIDSequenceTests.swift; sourceTree = "<group>"; };
 		F00000000000000000000001 /* AIGlassesLink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIGlassesLink.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F00000000000000000000002 /* AIGlassesLinkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AIGlassesLinkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -90,6 +122,9 @@
 			isa = PBXGroup;
 			children = (
 				E00000000000000000000022 /* App */,
+				E00000000000000000000060 /* Audio */,
+				E00000000000000000000061 /* Haptics */,
+				E00000000000000000000062 /* UI */,
 				E00000000000000000000023 /* Model */,
 				E00000000000000000000024 /* Networking */,
 				E00000000000000000000025 /* Protocol */,
@@ -116,6 +151,9 @@
 				A00000000000000000000003 /* DeviceLinkModel.swift */,
 				A00000000000000000000004 /* FrameRateCounter.swift */,
 				A00000000000000000000005 /* LatestFrameProcessor.swift */,
+				A00000000000000000000014 /* ConversationModel.swift */,
+				A00000000000000000000016 /* ConversationSettings.swift */,
+				A00000000000000000000018 /* ResearcherModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -124,6 +162,8 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000008 /* WebSocketServer.swift */,
+				A00000000000000000000013 /* ConversationClient.swift */,
+				A00000000000000000000017 /* ResearcherClient.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -155,6 +195,34 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
+		E00000000000000000000060 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000010 /* AudioSessionController.swift */,
+				A00000000000000000000011 /* MicrophoneCapture.swift */,
+				A00000000000000000000012 /* PacedAudioPlayer.swift */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		E00000000000000000000061 /* Haptics */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000015 /* HapticFeedback.swift */,
+			);
+			path = Haptics;
+			sourceTree = "<group>";
+		};
+		E00000000000000000000062 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000019 /* SessionView.swift */,
+				A0000000000000000000001A /* ResearcherView.swift */,
+				A0000000000000000000001B /* SettingsView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
 		E00000000000000000000028 /* AIGlassesLinkTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -162,6 +230,10 @@
 				B00000000000000000000002 /* ThermalCanonicalizerTests.swift */,
 				B00000000000000000000003 /* FrameRateCounterTests.swift */,
 				B00000000000000000000004 /* ThermalRendererTests.swift */,
+				B00000000000000000000010 /* AudioChunkingTests.swift */,
+				B00000000000000000000011 /* ConversationProtocolTests.swift */,
+				B00000000000000000000012 /* JitterBufferTests.swift */,
+				B00000000000000000000013 /* TurnIDSequenceTests.swift */,
 			);
 			path = AIGlassesLinkTests;
 			sourceTree = "<group>";
@@ -286,6 +358,18 @@
 				C0000000000000000000000A /* ImageDecoder.swift in Sources */,
 				C0000000000000000000000B /* ThermalCanonicalizer.swift in Sources */,
 				C0000000000000000000000C /* ThermalRenderer.swift in Sources */,
+				C00000000000000000000020 /* AudioSessionController.swift in Sources */,
+				C00000000000000000000021 /* MicrophoneCapture.swift in Sources */,
+				C00000000000000000000022 /* PacedAudioPlayer.swift in Sources */,
+				C00000000000000000000023 /* ConversationClient.swift in Sources */,
+				C00000000000000000000024 /* ConversationModel.swift in Sources */,
+				C00000000000000000000025 /* HapticFeedback.swift in Sources */,
+				C00000000000000000000026 /* ConversationSettings.swift in Sources */,
+				C00000000000000000000027 /* ResearcherClient.swift in Sources */,
+				C00000000000000000000028 /* ResearcherModel.swift in Sources */,
+				C00000000000000000000029 /* SessionView.swift in Sources */,
+				C0000000000000000000002A /* ResearcherView.swift in Sources */,
+				C0000000000000000000002B /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,6 +381,10 @@
 				C00000000000000000000012 /* ThermalCanonicalizerTests.swift in Sources */,
 				C00000000000000000000013 /* FrameRateCounterTests.swift in Sources */,
 				C00000000000000000000014 /* ThermalRendererTests.swift in Sources */,
+				C00000000000000000000030 /* AudioChunkingTests.swift in Sources */,
+				C00000000000000000000031 /* ConversationProtocolTests.swift in Sources */,
+				C00000000000000000000032 /* JitterBufferTests.swift in Sources */,
+				C00000000000000000000033 /* TurnIDSequenceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
