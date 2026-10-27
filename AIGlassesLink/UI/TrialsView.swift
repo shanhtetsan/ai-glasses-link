@@ -77,13 +77,30 @@ struct TrialsView: View {
                 if let status = row.phoneCaptureStatus {
                     Label(uploadLabel(status), systemImage: uploadIcon(status))
                         .foregroundStyle(uploadColor(status))
+                    if status == .uploaded {
+                        let archived = PhoneCaptureUploadReceipt.isArchived(row.phoneCaptureR2Status)
+                        Label(
+                            archived ? "archived" : "on server, not archived",
+                            systemImage: archived ? "archivebox.fill" : "archivebox"
+                        )
+                        .foregroundStyle(archived ? .green : .secondary)
+                    }
                 }
             }
             .font(.caption)
             if let error = row.phoneCaptureError, row.phoneCaptureStatus != .uploaded {
                 Text(row.phoneCaptureStatus == .failed ? "\(error) Local copy kept." : error)
                     .font(.caption)
-                    .foregroundStyle(row.phoneCaptureStatus == .failed ? .red : .secondary)
+                    .foregroundStyle(row.phoneCaptureStatus == .failed ? .red : .orange)
+            }
+            if row.phoneCaptureStatus == .failed {
+                Button {
+                    model.retryUpload(for: row)
+                } label: {
+                    Label("Retry upload", systemImage: "arrow.clockwise.icloud")
+                        .font(.caption.bold())
+                }
+                .buttonStyle(.borderless)
             }
         }
         .padding(.vertical, 4)

@@ -7,6 +7,8 @@ struct LocalCaptureRecord: Codable, Identifiable, Equatable, Sendable {
     var status: PhoneCaptureUploadState
     var lastError: String?
     var uploadAttempts: Int
+    /// r2 status from the server's 200 response; only set on uploaded captures.
+    var r2Status: String?
 
     var id: String { sessionID }
 
@@ -17,6 +19,7 @@ struct LocalCaptureRecord: Codable, Identifiable, Equatable, Sendable {
         case status
         case lastError = "last_error"
         case uploadAttempts = "upload_attempts"
+        case r2Status = "r2_status"
     }
 }
 
@@ -71,6 +74,28 @@ final class PhoneCaptureUploadManager: ObservableObject {
                 let seconds = min(pow(2.0, Double(retry)), 60)
                 try? await Task.sleep(for: .seconds(seconds))
             }
+            self.uploadTasks[sessionID] = nil
+        }
+    }
+
+    /// Manual retry for a capture the server rejected: back to pending, one attempt, nothing deleted.
+    func retry(sessionID: String) {
+        guard uploadTasks[sessionID] == nil,
+              captures.contains(where: { $0.sessionID == sessionID && $0.status == .failed }) else {
+            return
+        }
+        do {
+            try updateManifest(sessionID: sessionID) { manifest in
+                manifest.uploadState = .pending
+                manifest.lastUploadError = nil
+            }
+        } catch {
+            return
+        }
+        refresh()
+        uploadTasks[sessionID] = Task { [weak self] in
+            guard let self else { return }
+            _ = await self.uploadOnce(sessionID: sessionID)
             self.uploadTasks[sessionID] = nil
         }
     }
@@ -135,7 +160,11 @@ final class PhoneCaptureUploadManager: ObservableObject {
 
     nonisolated static func describe(_ error: Error) -> String {
         if case let TrialAPIError.http(status, message) = error {
-            return "Upload rejected (HTTP \(status))" + (message.map { ": \($0)" } ?? "")
+            switch status {
+            case 401, 403: return "Token rejected, check Settings"
+            case 404: return "Trial not found on server"
+            default: return "Upload rejected (HTTP \(status))" + (message.map { ": \($0)" } ?? "")
+            }
         }
         return error.localizedDescription
     }
@@ -161,7 +190,7 @@ final class PhoneCaptureUploadManager: ObservableObject {
                 )
                 try StoredZipWriter.createArchive(items: contents.items, at: archive)
             }.value
-            try await client.upload(
+            let receipt = try await client.upload(
                 archiveURL: archive,
                 sessionID: sessionID,
                 baseURL: baseURL,
@@ -171,7 +200,9 @@ final class PhoneCaptureUploadManager: ObservableObject {
                 manifest.uploadState = .uploaded
                 manifest.lastUploadError = nil
             }
-            try persistUploadedReceipt(record)
+            var uploaded = record
+            uploaded.r2Status = receipt.r2Status
+            try persistUploadedReceipt(uploaded)
             try? fileManager.removeItem(at: directory)
             try? fileManager.removeItem(at: archive)
             refresh()

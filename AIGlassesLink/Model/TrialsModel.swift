@@ -13,6 +13,7 @@ struct TrialListRow: Identifiable, Equatable {
     let turnCount: Int?
     let phoneCaptureStatus: PhoneCaptureUploadState?
     let phoneCaptureError: String?
+    let phoneCaptureR2Status: String?
     let isAvailableOnServer: Bool
 
     var id: String { sessionID }
@@ -66,6 +67,10 @@ final class TrialsModel: ObservableObject {
         mergeRows()
     }
 
+    func retryUpload(for row: TrialListRow) {
+        uploadManager.retry(sessionID: row.sessionID)
+    }
+
     func detailURL(for row: TrialListRow) -> URL? {
         guard row.isAvailableOnServer,
               let baseURL = backendSettings.normalizedBaseURL else { return nil }
@@ -92,6 +97,7 @@ final class TrialsModel: ObservableObject {
                 turnCount: trial.turnCount,
                 phoneCaptureStatus: local[trial.id]?.status,
                 phoneCaptureError: local[trial.id]?.lastError,
+                phoneCaptureR2Status: local[trial.id]?.r2Status,
                 isAvailableOnServer: true
             )
         }
@@ -109,6 +115,7 @@ final class TrialsModel: ObservableObject {
                 turnCount: nil,
                 phoneCaptureStatus: capture.status,
                 phoneCaptureError: capture.lastError,
+                phoneCaptureR2Status: capture.r2Status,
                 isAvailableOnServer: false
             ))
         }

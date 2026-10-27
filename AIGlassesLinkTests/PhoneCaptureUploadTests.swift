@@ -154,9 +154,96 @@ final class PhoneCaptureUploadTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: writer.directoryURL.path))
     }
 
+    func testAuthAndNotFoundKeepRetryingWithVisibleMessages() {
+        for status in [401, 403] {
+            let error = TrialAPIError.http(status: status, message: "nope")
+            XCTAssertEqual(PhoneCaptureUploadManager.outcome(for: error), .retryLater, "HTTP \(status)")
+            XCTAssertEqual(PhoneCaptureUploadManager.describe(error), "Token rejected, check Settings")
+        }
+        let notFound = TrialAPIError.http(status: 404, message: nil)
+        XCTAssertEqual(PhoneCaptureUploadManager.outcome(for: notFound), .retryLater)
+        XCTAssertEqual(PhoneCaptureUploadManager.describe(notFound), "Trial not found on server")
+    }
+
+    func testR2StatusDecodingAndArchivedLabel() {
+        func r2(_ json: String) -> String? {
+            PhoneCaptureUploadReceipt.decode(Data(json.utf8)).r2Status
+        }
+        XCTAssertEqual(r2(#"{"ok": true, "r2": "done"}"#), "done")
+        XCTAssertEqual(r2(#"{"r2": {"status": "queued"}}"#), "queued")
+        XCTAssertEqual(r2(#"{"r2": true}"#), "done")
+        XCTAssertNil(r2(#"{"ok": true}"#))
+        XCTAssertNil(r2("not json"))
+
+        XCTAssertTrue(PhoneCaptureUploadReceipt.isArchived("done"))
+        XCTAssertFalse(PhoneCaptureUploadReceipt.isArchived("queued"))
+        XCTAssertFalse(PhoneCaptureUploadReceipt.isArchived(nil))
+    }
+
+    @MainActor
+    func testUploadedReceiptKeepsR2StatusAndOldReceiptsStillLoad() throws {
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let receipts = """
+        [
+          {"session_id": "T01_P01", "trial": {"trial": "T01", "pid": "P01", "site": "", "cond": "",
+           "task": "", "success_criterion": ""}, "created_at": "2026-10-26T10:00:00Z",
+           "status": "uploaded", "upload_attempts": 1, "r2_status": "done"},
+          {"session_id": "T02_P01", "trial": {"trial": "T02", "pid": "P01", "site": "", "cond": "",
+           "task": "", "success_criterion": ""}, "created_at": "2026-10-26T09:00:00Z",
+           "status": "uploaded", "upload_attempts": 1}
+        ]
+        """
+        try Data(receipts.utf8).write(to: root.appendingPathComponent("uploaded.json"))
+
+        let manager = PhoneCaptureUploadManager(backendSettings: try Self.offlineSettings(), rootURL: root)
+        let byID = Dictionary(uniqueKeysWithValues: manager.captures.map { ($0.sessionID, $0) })
+        XCTAssertEqual(byID["T01_P01"]?.r2Status, "done")
+        XCTAssertNil(byID["T02_P01"]?.r2Status)
+    }
+
+    @MainActor
+    func testRetryResetsFailedCaptureAndDeletesNothing() async throws {
+        let writer = try makeWriter()
+        try writer.saveFrame(Self.tinyJPEG, sequence: 1)
+        writer.close()
+        var manifest = try PhoneCaptureWriter.loadManifest(in: writer.directoryURL)
+        manifest.uploadState = .failed
+        manifest.lastUploadError = "Upload rejected (HTTP 422)"
+        try PhoneCaptureWriter.writeManifest(
+            manifest,
+            to: writer.directoryURL.appendingPathComponent("capture.json")
+        )
+
+        // No backend URL, so the single attempt cannot reach a server.
+        let manager = PhoneCaptureUploadManager(backendSettings: try Self.offlineSettings(), rootURL: root)
+        manager.retry(sessionID: writer.sessionID)
+        XCTAssertEqual(manager.captures.first?.status, .pending)
+        XCTAssertNil(manager.captures.first?.lastError)
+
+        for _ in 0..<50 { await Task.yield() }
+        XCTAssertNotEqual(manager.captures.first?.status, .failed)
+        XCTAssertTrue(FileManager.default.fileExists(
+            atPath: writer.framesURL.appendingPathComponent("1.jpg").path
+        ))
+        XCTAssertTrue(FileManager.default.fileExists(
+            atPath: writer.directoryURL.appendingPathComponent("capture.json").path
+        ))
+
+        // Retry only applies to failed captures.
+        manager.retry(sessionID: "does-not-exist")
+        XCTAssertEqual(manager.captures.count, 1)
+    }
+
     // MARK: - Helpers
 
     private static let tinyJPEG = Data([0xFF, 0xD8, 0x01, 0x02, 0xFF, 0xD9])
+
+    @MainActor
+    private static func offlineSettings() throws -> BackendSettings {
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: UUID().uuidString))
+        defaults.set("", forKey: BackendSettings.backendURLKey)
+        return BackendSettings(defaults: defaults)
+    }
 
     private func makeWriter() throws -> PhoneCaptureWriter {
         try PhoneCaptureWriter(
