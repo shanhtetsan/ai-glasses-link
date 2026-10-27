@@ -1,7 +1,15 @@
 import CoreMotion
 import Foundation
 
-final class PhoneMotionCapture: @unchecked Sendable {
+/// Something that produces IMU packets for phone capture.
+protocol PhoneMotionSource: AnyObject {
+    var onPacket: (@Sendable (PhoneImuPacket, UInt64) -> Void)? { get set }
+    var onError: (@Sendable (Error) -> Void)? { get set }
+    func start()
+    func stop()
+}
+
+final class PhoneMotionCapture: PhoneMotionSource, @unchecked Sendable {
     var onPacket: (@Sendable (PhoneImuPacket, UInt64) -> Void)?
     var onError: (@Sendable (Error) -> Void)?
 

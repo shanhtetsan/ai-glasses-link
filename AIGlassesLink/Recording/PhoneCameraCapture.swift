@@ -2,7 +2,15 @@ import AVFoundation
 import CoreImage
 import Foundation
 
-final class PhoneCameraCapture: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, @unchecked Sendable {
+/// Something that produces encoded camera frames for phone capture.
+protocol PhoneFrameSource: AnyObject {
+    var onJPEG: (@Sendable (Data) -> Void)? { get set }
+    var onError: (@Sendable (Error) -> Void)? { get set }
+    func start()
+    func stop()
+}
+
+final class PhoneCameraCapture: NSObject, PhoneFrameSource, AVCaptureVideoDataOutputSampleBufferDelegate, @unchecked Sendable {
     var onJPEG: (@Sendable (Data) -> Void)?
     var onError: (@Sendable (Error) -> Void)?
 

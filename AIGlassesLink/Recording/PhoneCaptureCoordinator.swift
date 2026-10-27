@@ -10,17 +10,20 @@ final class PhoneCaptureCoordinator: @unchecked Sendable {
 
     private let writer: PhoneCaptureWriter
     private let sensorClient: PhoneSensorClient
-    private let camera: PhoneCameraCapture
-    private let motion: PhoneMotionCapture
+    private let camera: PhoneFrameSource
+    private let motion: PhoneMotionSource
     private let queue = DispatchQueue(label: "com.aiglasses.link.phone-capture-writer")
     private var frameSequence: UInt64
     private var accepting = false
+    /// Payloads captured while the socket was down; reported in the next socket_open.
+    private var framesNotSent = 0
+    private var imuNotSent = 0
 
     init(
         writer: PhoneCaptureWriter,
         sensorClient: PhoneSensorClient,
-        camera: PhoneCameraCapture = PhoneCameraCapture(),
-        motion: PhoneMotionCapture = PhoneMotionCapture()
+        camera: PhoneFrameSource = PhoneCameraCapture(),
+        motion: PhoneMotionSource = PhoneMotionCapture()
     ) {
         self.writer = writer
         self.sensorClient = sensorClient
@@ -33,6 +36,8 @@ final class PhoneCaptureCoordinator: @unchecked Sendable {
     func start(buttonMonotonicNanoseconds: UInt64) {
         queue.sync {
             accepting = true
+            framesNotSent = 0
+            imuNotSent = 0
             do {
                 try writer.logPhoneEvent(
                     "button_start",
@@ -48,9 +53,6 @@ final class PhoneCaptureCoordinator: @unchecked Sendable {
     }
 
     func stop(buttonMonotonicNanoseconds: UInt64) {
-        camera.stop()
-        motion.stop()
-        sensorClient.disconnect()
         queue.sync {
             guard accepting else { return }
             do {
@@ -68,6 +70,9 @@ final class PhoneCaptureCoordinator: @unchecked Sendable {
             accepting = false
             writer.close()
         }
+        camera.stop()
+        motion.stop()
+        sensorClient.disconnect()
     }
 
     private func installCallbacks() {
@@ -79,28 +84,24 @@ final class PhoneCaptureCoordinator: @unchecked Sendable {
             self?.queue.async { self?.handleIMU(packet, monotonic: monotonic) }
         }
         motion.onError = { [weak self] error in self?.onError?(error) }
-        sensorClient.onConnectionChange = { [weak self] connected in
+        sensorClient.onEvent = { [weak self] event in
             guard let self else { return }
-            self.queue.async {
-                if self.accepting {
-                    try? self.writer.logPhoneEvent(connected ? "socket_open" : "socket_close")
-                }
-                self.onConnectionChange?(connected)
-            }
+            self.queue.async { self.handleSocketEvent(event) }
         }
-        sensorClient.onSendResult = { [weak self] kind, succeeded, message in
+        sensorClient.onSendResult = { [weak self] kind, result in
             guard let self else { return }
             self.queue.async {
                 guard self.accepting else { return }
-                if succeeded {
+                switch result {
+                case .sent:
                     if kind == .frame { self.onFrameSent?() }
-                } else {
+                case .notConnected:
+                    // Not resent later; the uploaded capture has every frame.
+                    if kind == .frame { self.framesNotSent += 1 } else { self.imuNotSent += 1 }
+                case let .failed(message):
                     try? self.writer.logPhoneEvent(
                         "send_failure",
-                        details: [
-                            "payload": kind.rawValue,
-                            "error": message ?? "unknown",
-                        ]
+                        details: ["payload": kind.rawValue, "error": message]
                     )
                 }
             }
@@ -116,6 +117,33 @@ final class PhoneCaptureCoordinator: @unchecked Sendable {
         var message = Data([MessageType.camera.rawValue])
         message.append(stamped)
         return (stamped, message)
+    }
+
+    private func handleSocketEvent(_ event: PhoneSensorClient.Event) {
+        switch event {
+        case let .opened(attempts):
+            if accepting {
+                try? writer.logPhoneEvent(
+                    "socket_open",
+                    details: [
+                        "attempts": attempts,
+                        "frames_not_sent": framesNotSent,
+                        "imu_not_sent": imuNotSent,
+                    ]
+                )
+            }
+            framesNotSent = 0
+            imuNotSent = 0
+            onConnectionChange?(true)
+        case let .closed(reason, wasOpen):
+            if accepting {
+                try? writer.logPhoneEvent(
+                    "socket_close",
+                    details: ["reason": reason, "was_open": wasOpen]
+                )
+            }
+            onConnectionChange?(false)
+        }
     }
 
     private func handleFrame(_ jpeg: Data) {
