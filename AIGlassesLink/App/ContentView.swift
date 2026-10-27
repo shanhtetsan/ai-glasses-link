@@ -4,7 +4,9 @@ struct ContentView: View {
     @ObservedObject var deviceModel: DeviceLinkModel
     @ObservedObject var conversationModel: ConversationModel
     @ObservedObject var researcherModel: ResearcherModel
+    @ObservedObject var recordModel: RecordModel
     @ObservedObject var settings: ConversationSettings
+    @ObservedObject var backendSettings: BackendSettings
 
     var body: some View {
         TabView {
@@ -13,12 +15,12 @@ struct ContentView: View {
                     Label("Session", systemImage: "waveform.circle.fill")
                 }
 
-            ResearcherView(researcher: researcherModel, device: deviceModel)
+            RecordView(model: recordModel, researcher: researcherModel, device: deviceModel)
                 .tabItem {
-                    Label("Researcher", systemImage: "chart.xyaxis.line")
+                    Label("Record", systemImage: "record.circle")
                 }
 
-            SettingsView(settings: settings)
+            SettingsView(settings: settings, backendSettings: backendSettings)
                 .tabItem {
                     Label("Settings", systemImage: "gearshape.fill")
                 }

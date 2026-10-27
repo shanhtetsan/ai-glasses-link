@@ -22,6 +22,8 @@
 	<true/>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>AI Glasses Link receives camera and thermal frames from your ESP32 over the local network.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>AI Glasses Link uses the back camera to record and stream research trials.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>AI Glasses Link uses the microphone so you can speak with the glasses assistant.</string>
 	<key>UIApplicationSceneManifest</key>

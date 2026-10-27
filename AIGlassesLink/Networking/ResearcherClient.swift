@@ -1,9 +1,7 @@
 import Foundation
 
 final class ResearcherClient: @unchecked Sendable {
-    static let viewerURL = URL(string: "wss://ai-glasses-for-research.fly.dev/ws/viewer")!
-    static let uiURL = URL(string: "wss://ai-glasses-for-research.fly.dev/ws_ui")!
-    static let metricsURL = URL(string: "https://ai-glasses-for-research.fly.dev/latency/metrics")!
+    static let defaultBaseURL = URL(string: BackendSettings.defaultBackendURL)!
 
     var onJPEG: (@Sendable (Data) -> Void)?
     var onUIText: (@Sendable (String) -> Void)?
@@ -12,13 +10,39 @@ final class ResearcherClient: @unchecked Sendable {
 
     private let queue = DispatchQueue(label: "com.aiglasses.link.researcher-client")
     private let session: URLSession
+    private var baseURL: URL
     private var viewerTask: URLSessionWebSocketTask?
     private var uiTask: URLSessionWebSocketTask?
     private var metricsTimer: DispatchSourceTimer?
     private var running = false
 
-    init(configuration: URLSessionConfiguration = .default) {
+    init(
+        baseURL: URL = defaultBaseURL,
+        configuration: URLSessionConfiguration = .default
+    ) {
+        self.baseURL = baseURL
         session = URLSession(configuration: configuration)
+    }
+
+    func updateBackend(_ baseURL: URL) {
+        queue.async { [weak self] in
+            guard let self, self.baseURL != baseURL else { return }
+            let shouldRestart = self.running
+            self.running = false
+            self.viewerTask?.cancel(with: .goingAway, reason: nil)
+            self.uiTask?.cancel(with: .goingAway, reason: nil)
+            self.viewerTask = nil
+            self.uiTask = nil
+            self.metricsTimer?.cancel()
+            self.metricsTimer = nil
+            self.baseURL = baseURL
+            if shouldRestart {
+                self.running = true
+                self.openViewer()
+                self.openUI()
+                self.startMetricsPolling()
+            }
+        }
     }
 
     func start() {
@@ -45,16 +69,18 @@ final class ResearcherClient: @unchecked Sendable {
     }
 
     private func openViewer() {
-        guard running, viewerTask == nil else { return }
-        let task = session.webSocketTask(with: Self.viewerURL)
+        guard running, viewerTask == nil,
+              let url = BackendEndpoint.webSocketURL(base: baseURL, path: "/ws/viewer") else { return }
+        let task = session.webSocketTask(with: url)
         viewerTask = task
         task.resume()
         receiveViewer(on: task)
     }
 
     private func openUI() {
-        guard running, uiTask == nil else { return }
-        let task = session.webSocketTask(with: Self.uiURL)
+        guard running, uiTask == nil,
+              let url = BackendEndpoint.webSocketURL(base: baseURL, path: "/ws_ui") else { return }
+        let task = session.webSocketTask(with: url)
         uiTask = task
         task.resume()
         receiveUI(on: task)
@@ -129,8 +155,9 @@ final class ResearcherClient: @unchecked Sendable {
     }
 
     private func fetchMetrics() {
-        guard running else { return }
-        session.dataTask(with: Self.metricsURL) { [weak self] data, response, error in
+        guard running,
+              let url = BackendEndpoint.httpURL(base: baseURL, path: "/latency/metrics") else { return }
+        session.dataTask(with: url) { [weak self] data, response, error in
             if let error {
                 self?.onError?(error)
                 return

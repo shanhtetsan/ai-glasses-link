@@ -37,6 +37,10 @@ final class ResearcherModel: ObservableObject {
         client.stop()
     }
 
+    func updateBackend(_ baseURL: URL) {
+        client.updateBackend(baseURL)
+    }
+
     private func installCallbacks() {
         frameProcessor.onResult = { [weak self] result in
             Task { @MainActor in

@@ -10,6 +10,7 @@ final class DeviceLinkModel: ObservableObject {
     @Published private(set) var thermalImage: CGImage?
     @Published private(set) var cameraFPS = 0.0
     @Published private(set) var thermalFPS = 0.0
+    @Published private(set) var imuHz = 0.0
     @Published private(set) var lastError: String?
 
     let configuration: ServerConfiguration
@@ -26,6 +27,7 @@ final class DeviceLinkModel: ObservableObject {
     private let monitorQueue = DispatchQueue(label: "com.aiglasses.link.path-monitor")
     private var cameraRate = FrameRateCounter()
     private var thermalRate = FrameRateCounter()
+    private var imuRate = FrameRateCounter()
     private var fpsTimer: Timer?
     private var isRunning = false
 
@@ -111,8 +113,10 @@ final class DeviceLinkModel: ObservableObject {
         fpsTimer = nil
         cameraRate.reset()
         thermalRate.reset()
+        imuRate.reset()
         cameraFPS = 0
         thermalFPS = 0
+        imuHz = 0
     }
 
     private nonisolated func handle(_ data: Data) {
@@ -122,7 +126,9 @@ final class DeviceLinkModel: ObservableObject {
                 cameraProcessor.submit(payload)
             case let .thermal(payload):
                 thermalProcessor.submit(payload)
-            case .imu, .status:
+            case .imu:
+                Task { @MainActor [weak self] in self?.imuRate.record() }
+            case .status:
                 break
             }
         } catch {
@@ -136,6 +142,7 @@ final class DeviceLinkModel: ObservableObject {
         let now = ProcessInfo.processInfo.systemUptime
         cameraFPS = cameraRate.framesPerSecond(at: now)
         thermalFPS = thermalRate.framesPerSecond(at: now)
+        imuHz = imuRate.framesPerSecond(at: now)
     }
 
     private func startPathMonitoring() {

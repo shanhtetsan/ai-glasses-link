@@ -3,10 +3,35 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var settings: ConversationSettings
+    @ObservedObject var backendSettings: BackendSettings
 
     var body: some View {
         NavigationStack {
             Form {
+                Section("Research backend") {
+                    TextField("https://example.com", text: $backendSettings.backendURL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.URL)
+                    if backendSettings.normalizedBaseURL == nil {
+                        Text("Enter a valid HTTP or HTTPS URL.")
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
+                }
+
+                Section("Trial access") {
+                    SecureField("Trial token", text: $backendSettings.trialToken)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    Text("The token is stored in this iPhone's Keychain and sent as X-Trial-Token.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    if let error = backendSettings.tokenError {
+                        Text(error).font(.footnote).foregroundStyle(.red)
+                    }
+                }
+
                 Section("Voice") {
                     Picker("Assistant voice", selection: $settings.voiceIdentifier) {
                         ForEach(settings.availableVoices, id: \.identifier) { voice in
