@@ -20,6 +20,12 @@ struct LocalCaptureRecord: Codable, Identifiable, Equatable, Sendable {
     }
 }
 
+enum PhoneCaptureUploadOutcome: Equatable {
+    case uploaded
+    case retryLater
+    case failedPermanently
+}
+
 @MainActor
 final class PhoneCaptureUploadManager: ObservableObject {
     @Published private(set) var captures: [LocalCaptureRecord] = []
@@ -45,7 +51,7 @@ final class PhoneCaptureUploadManager: ObservableObject {
 
     func start() {
         refresh()
-        for capture in captures where capture.status != .uploaded {
+        for capture in captures where capture.status == .pending {
             enqueue(sessionID: capture.sessionID)
         }
     }
@@ -53,14 +59,14 @@ final class PhoneCaptureUploadManager: ObservableObject {
     func enqueue(sessionID: String) {
         refresh()
         guard uploadTasks[sessionID] == nil,
-              captures.contains(where: { $0.sessionID == sessionID && $0.status != .uploaded }) else {
+              captures.contains(where: { $0.sessionID == sessionID && $0.status == .pending }) else {
             return
         }
         uploadTasks[sessionID] = Task { [weak self] in
             guard let self else { return }
             var retry = 0
             while !Task.isCancelled {
-                if await self.uploadOnce(sessionID: sessionID) { break }
+                if await self.uploadOnce(sessionID: sessionID) != .retryLater { break }
                 retry += 1
                 let seconds = min(pow(2.0, Double(retry)), 60)
                 try? await Task.sleep(for: .seconds(seconds))
@@ -93,7 +99,7 @@ final class PhoneCaptureUploadManager: ObservableObject {
                     sessionID: manifest.sessionID,
                     trial: manifest.trial,
                     createdAt: manifest.createdAt,
-                    status: manifest.uploadState == .uploaded ? .uploaded : .pending,
+                    status: manifest.uploadState == .uploading ? .pending : manifest.uploadState,
                     lastError: manifest.lastUploadError,
                     uploadAttempts: manifest.uploadAttempts
                 )
@@ -117,10 +123,27 @@ final class PhoneCaptureUploadManager: ObservableObject {
         }
     }
 
-    private func uploadOnce(sessionID: String) async -> Bool {
+    /// 422 (bad ZIP) and 413 (too big) will not succeed on retry, and neither will a
+    /// capture folder that cannot be packaged. Everything else (409, 507, 5xx, network) retries.
+    nonisolated static func outcome(for error: Error) -> PhoneCaptureUploadOutcome {
+        if error is PhoneCaptureUploadPackageError { return .failedPermanently }
+        if case let TrialAPIError.http(status, _) = error, status == 422 || status == 413 {
+            return .failedPermanently
+        }
+        return .retryLater
+    }
+
+    nonisolated static func describe(_ error: Error) -> String {
+        if case let TrialAPIError.http(status, message) = error {
+            return "Upload rejected (HTTP \(status))" + (message.map { ": \($0)" } ?? "")
+        }
+        return error.localizedDescription
+    }
+
+    private func uploadOnce(sessionID: String) async -> PhoneCaptureUploadOutcome {
         guard let baseURL = backendSettings.normalizedBaseURL,
               let record = captures.first(where: { $0.sessionID == sessionID }) else {
-            return false
+            return .retryLater
         }
         let directory = rootURL.appendingPathComponent(sessionID, isDirectory: true)
         let archive = rootURL.appendingPathComponent("\(sessionID).zip")
@@ -132,7 +155,11 @@ final class PhoneCaptureUploadManager: ObservableObject {
             }
             refresh()
             try await Task.detached(priority: .utility) {
-                try StoredZipWriter.createArchive(from: directory, at: archive)
+                let contents = try PhoneCaptureUploadPackage.prepare(
+                    directory: directory,
+                    sessionID: sessionID
+                )
+                try StoredZipWriter.createArchive(items: contents.items, at: archive)
             }.value
             try await client.upload(
                 archiveURL: archive,
@@ -148,14 +175,17 @@ final class PhoneCaptureUploadManager: ObservableObject {
             try? fileManager.removeItem(at: directory)
             try? fileManager.removeItem(at: archive)
             refresh()
-            return true
+            return .uploaded
         } catch {
+            // The ZIP is rebuilt on every attempt; the capture folder itself is never deleted here.
+            try? fileManager.removeItem(at: archive)
+            let outcome = Self.outcome(for: error)
             try? updateManifest(sessionID: sessionID) { manifest in
-                manifest.uploadState = .pending
-                manifest.lastUploadError = error.localizedDescription
+                manifest.uploadState = outcome == .failedPermanently ? .failed : .pending
+                manifest.lastUploadError = Self.describe(error)
             }
             refresh()
-            return false
+            return outcome
         }
     }
 

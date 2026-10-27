@@ -12,6 +12,7 @@ struct TrialListRow: Identifiable, Equatable {
     let date: String?
     let turnCount: Int?
     let phoneCaptureStatus: PhoneCaptureUploadState?
+    let phoneCaptureError: String?
     let isAvailableOnServer: Bool
 
     var id: String { sessionID }
@@ -90,6 +91,7 @@ final class TrialsModel: ObservableObject {
                 date: trial.date,
                 turnCount: trial.turnCount,
                 phoneCaptureStatus: local[trial.id]?.status,
+                phoneCaptureError: local[trial.id]?.lastError,
                 isAvailableOnServer: true
             )
         }
@@ -106,6 +108,7 @@ final class TrialsModel: ObservableObject {
                 date: capture.createdAt,
                 turnCount: nil,
                 phoneCaptureStatus: capture.status,
+                phoneCaptureError: capture.lastError,
                 isAvailableOnServer: false
             ))
         }

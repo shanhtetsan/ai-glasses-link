@@ -26,7 +26,7 @@ final class PhoneCaptureCoordinator: @unchecked Sendable {
         self.sensorClient = sensorClient
         self.camera = camera
         self.motion = motion
-        frameSequence = UInt64(writer.framesSaved)
+        frameSequence = writer.highestFrameSequence
         installCallbacks()
     }
 

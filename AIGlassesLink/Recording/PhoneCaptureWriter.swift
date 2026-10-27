@@ -18,6 +18,8 @@ enum PhoneCaptureUploadState: String, Codable, Sendable {
     case pending
     case uploading
     case uploaded
+    /// The server rejected the capture for good (e.g. 422). The local copy is kept and never retried automatically.
+    case failed
 }
 
 struct PhoneCaptureManifest: Codable, Equatable, Sendable {
@@ -49,7 +51,10 @@ final class PhoneCaptureWriter: @unchecked Sendable {
     private let fileManager: FileManager
     private let imuHandle: FileHandle
     private let phoneHandle: FileHandle
+    /// Number of frames/<seq>.jpg files on disk. Seq numbers can have gaps, so this is not the last seq.
     private(set) var framesSaved: Int
+    /// Highest seq on disk; a resumed session continues numbering after it.
+    private(set) var highestFrameSequence: UInt64
     private var closed = false
 
     init(
@@ -71,10 +76,9 @@ final class PhoneCaptureWriter: @unchecked Sendable {
         let phoneURL = directoryURL.appendingPathComponent("phone.jsonl")
         imuHandle = try Self.appendHandle(at: imuURL, fileManager: fileManager)
         phoneHandle = try Self.appendHandle(at: phoneURL, fileManager: fileManager)
-        framesSaved = try fileManager.contentsOfDirectory(
-            at: framesURL,
-            includingPropertiesForKeys: nil
-        ).filter { $0.pathExtension.lowercased() == "jpg" }.count
+        let savedSequences = try Self.frameSequences(in: framesURL, fileManager: fileManager)
+        framesSaved = savedSequences.count
+        highestFrameSequence = savedSequences.max() ?? 0
 
         let manifestURL = directoryURL.appendingPathComponent("capture.json")
         if !fileManager.fileExists(atPath: manifestURL.path) {
@@ -100,11 +104,13 @@ final class PhoneCaptureWriter: @unchecked Sendable {
         defer { lock.unlock() }
         guard !closed else { throw PhoneCaptureWriterError.closed }
         let destination = framesURL.appendingPathComponent("\(sequence).jpg")
+        let isNewFile = !fileManager.fileExists(atPath: destination.path)
         try jpeg.write(to: destination, options: [.atomic])
         let handle = try FileHandle(forWritingTo: destination)
         try handle.synchronize()
         try handle.close()
-        framesSaved += 1
+        if isNewFile { framesSaved += 1 }
+        highestFrameSequence = max(highestFrameSequence, sequence)
     }
 
     func saveIMU(_ packet: PhoneImuPacket, monotonicNanoseconds: UInt64) throws {
@@ -161,6 +167,19 @@ final class PhoneCaptureWriter: @unchecked Sendable {
             in: .userDomainMask
         ).first!
         return applicationSupport.appendingPathComponent(capturesFolderName, isDirectory: true)
+    }
+
+    /// Seq numbers of the frames/<digits>.jpg files in a frames folder.
+    static func frameSequences(in framesURL: URL, fileManager: FileManager = .default) throws -> [UInt64] {
+        try fileManager.contentsOfDirectory(at: framesURL, includingPropertiesForKeys: nil)
+            .compactMap { frameSequence(fromFileName: $0.lastPathComponent) }
+    }
+
+    static func frameSequence(fromFileName name: String) -> UInt64? {
+        guard name.hasSuffix(".jpg") else { return nil }
+        let stem = name.dropLast(4)
+        guard !stem.isEmpty, stem.allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
+        return UInt64(stem)
     }
 
     static func loadManifest(in directoryURL: URL) throws -> PhoneCaptureManifest {

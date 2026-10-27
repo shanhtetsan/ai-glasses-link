@@ -75,16 +75,42 @@ struct TrialsView: View {
                     Label("\(turns) turns", systemImage: "text.bubble")
                 }
                 if let status = row.phoneCaptureStatus {
-                    Label(
-                        status == .uploaded ? "uploaded" : "pending",
-                        systemImage: status == .uploaded ? "checkmark.icloud.fill" : "icloud.and.arrow.up"
-                    )
-                    .foregroundStyle(status == .uploaded ? .green : .orange)
+                    Label(uploadLabel(status), systemImage: uploadIcon(status))
+                        .foregroundStyle(uploadColor(status))
                 }
             }
             .font(.caption)
+            if let error = row.phoneCaptureError, row.phoneCaptureStatus != .uploaded {
+                Text(row.phoneCaptureStatus == .failed ? "\(error) Local copy kept." : error)
+                    .font(.caption)
+                    .foregroundStyle(row.phoneCaptureStatus == .failed ? .red : .secondary)
+            }
         }
         .padding(.vertical, 4)
+    }
+}
+
+private func uploadLabel(_ status: PhoneCaptureUploadState) -> String {
+    switch status {
+    case .uploaded: "uploaded"
+    case .failed: "upload failed"
+    case .pending, .uploading: "pending"
+    }
+}
+
+private func uploadIcon(_ status: PhoneCaptureUploadState) -> String {
+    switch status {
+    case .uploaded: "checkmark.icloud.fill"
+    case .failed: "exclamationmark.icloud.fill"
+    case .pending, .uploading: "icloud.and.arrow.up"
+    }
+}
+
+private func uploadColor(_ status: PhoneCaptureUploadState) -> Color {
+    switch status {
+    case .uploaded: .green
+    case .failed: .red
+    case .pending, .uploading: .orange
     }
 }
 

@@ -10,9 +10,23 @@ enum StoredZipWriter {
         let dosDate: UInt16
     }
 
+    struct Item: Equatable {
+        /// Path inside the ZIP, using "/" separators.
+        let path: String
+        let fileURL: URL
+    }
+
     static func createArchive(from sourceDirectory: URL, at destination: URL) throws {
+        let files = try regularFiles(in: sourceDirectory, fileManager: .default)
+        try createArchive(
+            items: files.map { Item(path: relativePath(for: $0, under: sourceDirectory), fileURL: $0) },
+            at: destination
+        )
+    }
+
+    /// Writes exactly the given files, in order, under their given ZIP paths.
+    static func createArchive(items: [Item], at destination: URL) throws {
         let fileManager = FileManager.default
-        let files = try regularFiles(in: sourceDirectory, fileManager: fileManager)
         let partial = destination.appendingPathExtension("partial")
         if fileManager.fileExists(atPath: partial.path) { try fileManager.removeItem(at: partial) }
         guard fileManager.createFile(atPath: partial.path, contents: nil) else {
@@ -23,9 +37,9 @@ enum StoredZipWriter {
             let handle = try FileHandle(forWritingTo: partial)
             var entries: [Entry] = []
             do {
-                for file in files {
-                    let relative = relativePath(for: file, under: sourceDirectory)
-                    let name = Data(relative.utf8)
+                for item in items {
+                    let file = item.fileURL
+                    let name = Data(item.path.utf8)
                     guard name.count <= Int(UInt16.max) else { throw StoredZipError.pathTooLong }
                     let attributes = try fileManager.attributesOfItem(atPath: file.path)
                     let fileSize = (attributes[.size] as? NSNumber)?.uint64Value ?? 0
