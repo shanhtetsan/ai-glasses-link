@@ -60,6 +60,7 @@ final class PhoneCaptureWriter: @unchecked Sendable {
     init(
         sessionID: String,
         trial: TrialFormData,
+        deviceID: String? = nil,
         rootURL: URL = PhoneCaptureWriter.defaultRootURL(),
         fileManager: FileManager = .default
     ) throws {
@@ -92,7 +93,7 @@ final class PhoneCaptureWriter: @unchecked Sendable {
             )
             try Self.writeManifest(manifest, to: manifestURL)
         }
-        try logPhoneEvent("app_start")
+        try logPhoneEvent("app_start", details: deviceID.map { ["device_id": $0] } ?? [:])
     }
 
     deinit {

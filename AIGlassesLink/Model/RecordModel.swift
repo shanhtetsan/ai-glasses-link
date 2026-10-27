@@ -74,14 +74,15 @@ final class RecordModel: ObservableObject {
             sessionID = returnedSessionID
 
             if source == .phone {
-                guard let endpoint = BackendEndpoint.webSocketURL(
-                    base: baseURL,
-                    path: "/ws/camera_thermal",
-                    queryItems: [URLQueryItem(name: "source", value: "phone")]
-                ) else {
+                let deviceID = DeviceIdentity.current
+                guard let endpoint = DeviceIdentity.phoneSensorURL(base: baseURL, deviceID: deviceID) else {
                     throw TrialAPIError.invalidBackendURL
                 }
-                let writer = try PhoneCaptureWriter(sessionID: returnedSessionID, trial: cleanForm)
+                let writer = try PhoneCaptureWriter(
+                    sessionID: returnedSessionID,
+                    trial: cleanForm,
+                    deviceID: deviceID
+                )
                 let coordinator = PhoneCaptureCoordinator(
                     writer: writer,
                     sensorClient: PhoneSensorClient(
