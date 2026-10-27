@@ -97,7 +97,7 @@ struct RecordView: View {
                 statusTile("IMU", imuText)
                 statusTile("Connected", connectedText)
                 statusTile("Elapsed", elapsedText)
-                statusTile("Frames local / sent", "\(model.framesSaved) / \(model.framesSent)")
+                statusTile("Frames local / sent", framesText)
                     .gridCellColumns(2)
             }
         }
@@ -188,6 +188,10 @@ struct RecordView: View {
         if model.source == .phone { return model.phoneConnected ? "Yes" : "No" }
         if case .connected = device.status { return "Yes" }
         return "No"
+    }
+
+    private var framesText: String {
+        model.source == .phone ? "\(model.framesSaved) / \(model.framesSent)" : "—"
     }
 
     private var elapsedText: String {

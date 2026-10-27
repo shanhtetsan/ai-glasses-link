@@ -27,6 +27,7 @@ final class RecordModel: ObservableObject {
     let backendSettings: BackendSettings
 
     private let apiClient: TrialAPIClient
+    private let uploadManager: PhoneCaptureUploadManager?
     private var coordinator: PhoneCaptureCoordinator?
     private var startedAt: Date?
     private var displayTimer: Timer?
@@ -35,10 +36,12 @@ final class RecordModel: ObservableObject {
 
     init(
         backendSettings: BackendSettings,
-        apiClient: TrialAPIClient = TrialAPIClient()
+        apiClient: TrialAPIClient = TrialAPIClient(),
+        uploadManager: PhoneCaptureUploadManager? = nil
     ) {
         self.backendSettings = backendSettings
         self.apiClient = apiClient
+        self.uploadManager = uploadManager
     }
 
     var canStart: Bool {
@@ -111,6 +114,7 @@ final class RecordModel: ObservableObject {
               let baseURL = backendSettings.normalizedBaseURL else { return }
         isWorking = true
         lastError = nil
+        let completedPhoneSessionID = source == .phone ? sessionID : nil
         coordinator?.stop(buttonMonotonicNanoseconds: DispatchTime.now().uptimeNanoseconds)
         coordinator = nil
         phoneConnected = false
@@ -123,6 +127,9 @@ final class RecordModel: ObservableObject {
             )
         } catch {
             lastError = error.localizedDescription
+        }
+        if let completedPhoneSessionID {
+            uploadManager?.enqueue(sessionID: completedPhoneSessionID)
         }
         isWorking = false
     }

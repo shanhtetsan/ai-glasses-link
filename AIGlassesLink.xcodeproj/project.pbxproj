@@ -52,6 +52,13 @@
 		C00000000000000000000033 /* TurnIDSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000013 /* TurnIDSequenceTests.swift */; };
 		C00000000000000000000050 /* PhoneImuPacketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000014 /* PhoneImuPacketTests.swift */; };
 		C00000000000000000000051 /* PhoneCaptureWriterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000015 /* PhoneCaptureWriterTests.swift */; };
+		C00000000000000000000052 /* StoredZipWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000026 /* StoredZipWriter.swift */; };
+		C00000000000000000000053 /* PhoneCaptureUploadClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000027 /* PhoneCaptureUploadClient.swift */; };
+		C00000000000000000000054 /* PhoneCaptureUploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000028 /* PhoneCaptureUploadManager.swift */; };
+		C00000000000000000000055 /* TrialsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000029 /* TrialsClient.swift */; };
+		C00000000000000000000056 /* TrialsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000002A /* TrialsModel.swift */; };
+		C00000000000000000000057 /* TrialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000002B /* TrialsView.swift */; };
+		C00000000000000000000058 /* PhoneCaptureArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000016 /* PhoneCaptureArchiveTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +108,12 @@
 		A00000000000000000000023 /* PhoneMotionCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneMotionCapture.swift; sourceTree = "<group>"; };
 		A00000000000000000000024 /* PhoneCaptureCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCaptureCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000025 /* RecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordView.swift; sourceTree = "<group>"; };
+		A00000000000000000000026 /* StoredZipWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredZipWriter.swift; sourceTree = "<group>"; };
+		A00000000000000000000027 /* PhoneCaptureUploadClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCaptureUploadClient.swift; sourceTree = "<group>"; };
+		A00000000000000000000028 /* PhoneCaptureUploadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCaptureUploadManager.swift; sourceTree = "<group>"; };
+		A00000000000000000000029 /* TrialsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialsClient.swift; sourceTree = "<group>"; };
+		A0000000000000000000002A /* TrialsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialsModel.swift; sourceTree = "<group>"; };
+		A0000000000000000000002B /* TrialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrialsView.swift; sourceTree = "<group>"; };
 		B00000000000000000000001 /* IncomingMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingMessageTests.swift; sourceTree = "<group>"; };
 		B00000000000000000000002 /* ThermalCanonicalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalCanonicalizerTests.swift; sourceTree = "<group>"; };
 		B00000000000000000000003 /* FrameRateCounterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameRateCounterTests.swift; sourceTree = "<group>"; };
@@ -111,6 +124,7 @@
 		B00000000000000000000013 /* TurnIDSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurnIDSequenceTests.swift; sourceTree = "<group>"; };
 		B00000000000000000000014 /* PhoneImuPacketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneImuPacketTests.swift; sourceTree = "<group>"; };
 		B00000000000000000000015 /* PhoneCaptureWriterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCaptureWriterTests.swift; sourceTree = "<group>"; };
+		B00000000000000000000016 /* PhoneCaptureArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCaptureArchiveTests.swift; sourceTree = "<group>"; };
 		F00000000000000000000001 /* AIGlassesLink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIGlassesLink.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F00000000000000000000002 /* AIGlassesLinkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AIGlassesLinkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -181,6 +195,8 @@
 				A00000000000000000000018 /* ResearcherModel.swift */,
 				A0000000000000000000001C /* BackendSettings.swift */,
 				A0000000000000000000001D /* RecordModel.swift */,
+				A00000000000000000000028 /* PhoneCaptureUploadManager.swift */,
+				A0000000000000000000002A /* TrialsModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -193,6 +209,8 @@
 				A00000000000000000000017 /* ResearcherClient.swift */,
 				A0000000000000000000001E /* TrialAPIClient.swift */,
 				A0000000000000000000001F /* PhoneSensorClient.swift */,
+				A00000000000000000000027 /* PhoneCaptureUploadClient.swift */,
+				A00000000000000000000029 /* TrialsClient.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -232,6 +250,7 @@
 				A00000000000000000000022 /* PhoneCameraCapture.swift */,
 				A00000000000000000000023 /* PhoneMotionCapture.swift */,
 				A00000000000000000000024 /* PhoneCaptureCoordinator.swift */,
+				A00000000000000000000026 /* StoredZipWriter.swift */,
 			);
 			path = Recording;
 			sourceTree = "<group>";
@@ -249,6 +268,7 @@
 				B00000000000000000000013 /* TurnIDSequenceTests.swift */,
 				B00000000000000000000014 /* PhoneImuPacketTests.swift */,
 				B00000000000000000000015 /* PhoneCaptureWriterTests.swift */,
+				B00000000000000000000016 /* PhoneCaptureArchiveTests.swift */,
 			);
 			path = AIGlassesLinkTests;
 			sourceTree = "<group>";
@@ -287,6 +307,7 @@
 				A0000000000000000000001A /* ResearcherView.swift */,
 				A0000000000000000000001B /* SettingsView.swift */,
 				A00000000000000000000025 /* RecordView.swift */,
+				A0000000000000000000002B /* TrialsView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -424,6 +445,12 @@
 				C00000000000000000000047 /* PhoneMotionCapture.swift in Sources */,
 				C00000000000000000000048 /* PhoneCaptureCoordinator.swift in Sources */,
 				C00000000000000000000049 /* RecordView.swift in Sources */,
+				C00000000000000000000052 /* StoredZipWriter.swift in Sources */,
+				C00000000000000000000053 /* PhoneCaptureUploadClient.swift in Sources */,
+				C00000000000000000000054 /* PhoneCaptureUploadManager.swift in Sources */,
+				C00000000000000000000055 /* TrialsClient.swift in Sources */,
+				C00000000000000000000056 /* TrialsModel.swift in Sources */,
+				C00000000000000000000057 /* TrialsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,6 +468,7 @@
 				C00000000000000000000033 /* TurnIDSequenceTests.swift in Sources */,
 				C00000000000000000000050 /* PhoneImuPacketTests.swift in Sources */,
 				C00000000000000000000051 /* PhoneCaptureWriterTests.swift in Sources */,
+				C00000000000000000000058 /* PhoneCaptureArchiveTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

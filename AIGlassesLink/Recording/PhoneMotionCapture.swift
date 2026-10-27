@@ -16,27 +16,32 @@ final class PhoneMotionCapture: @unchecked Sendable {
     private var sequence: UInt32 = 0
 
     func start() {
-        guard manager.isDeviceMotionAvailable else {
+        guard manager.isAccelerometerAvailable, manager.isGyroAvailable else {
             onError?(PhoneMotionError.unavailable)
             return
         }
         sequence = 0
-        manager.deviceMotionUpdateInterval = 1.0 / 50.0
-        manager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: queue) { [weak self] motion, error in
+        manager.accelerometerUpdateInterval = 1.0 / 50.0
+        manager.gyroUpdateInterval = 1.0 / 50.0
+        manager.startGyroUpdates()
+        manager.startAccelerometerUpdates(to: queue) { [weak self] sample, error in
             guard let self else { return }
             if let error {
                 self.onError?(error)
                 return
             }
-            guard let motion else { return }
+            guard let sample else { return }
             self.sequence &+= 1
             let monotonic = DispatchTime.now().uptimeNanoseconds
             let uptimeMS = UInt32(truncatingIfNeeded: monotonic / 1_000_000)
+            let rotationRate = self.manager.gyroData?.rotationRate
+                ?? CMRotationRate(x: 0, y: 0, z: 0)
             self.onPacket?(
                 PhoneImuPacket(
                     sequence: self.sequence,
                     uptimeMilliseconds: uptimeMS,
-                    motion: motion
+                    acceleration: sample.acceleration,
+                    rotationRate: rotationRate
                 ),
                 monotonic
             )
@@ -44,7 +49,8 @@ final class PhoneMotionCapture: @unchecked Sendable {
     }
 
     func stop() {
-        manager.stopDeviceMotionUpdates()
+        manager.stopAccelerometerUpdates()
+        manager.stopGyroUpdates()
     }
 }
 

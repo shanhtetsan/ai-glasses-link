@@ -101,6 +101,9 @@ final class PhoneCaptureWriter: @unchecked Sendable {
         guard !closed else { throw PhoneCaptureWriterError.closed }
         let destination = framesURL.appendingPathComponent("\(sequence).jpg")
         try jpeg.write(to: destination, options: [.atomic])
+        let handle = try FileHandle(forWritingTo: destination)
+        try handle.synchronize()
+        try handle.close()
         framesSaved += 1
     }
 

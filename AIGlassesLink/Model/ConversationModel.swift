@@ -109,6 +109,13 @@ final class ConversationModel: ObservableObject {
         transition(to: .disconnected)
     }
 
+    func updateBackend(_ baseURL: URL) {
+        guard let endpoint = BackendEndpoint.webSocketURL(base: baseURL, path: "/ws_audio") else {
+            return
+        }
+        client.updateEndpoint(endpoint)
+    }
+
     func beginPushToTalk() {
         guard state != .disconnected, state != .listening else { return }
         pressIsHeld = true

@@ -44,12 +44,26 @@ struct PhoneImuPacket: Equatable, Sendable {
         self.init(
             sequence: sequence,
             uptimeMilliseconds: uptimeMilliseconds,
+            acceleration: acceleration,
+            rotationRate: motion.rotationRate
+        )
+    }
+
+    init(
+        sequence: UInt32,
+        uptimeMilliseconds: UInt32,
+        acceleration: CMAcceleration,
+        rotationRate: CMRotationRate
+    ) {
+        self.init(
+            sequence: sequence,
+            uptimeMilliseconds: uptimeMilliseconds,
             accelX: Float(-acceleration.x * Self.gravity),
             accelY: Float(-acceleration.y * Self.gravity),
             accelZ: Float(-acceleration.z * Self.gravity),
-            gyroX: Float(motion.rotationRate.x * 180 / .pi),
-            gyroY: Float(motion.rotationRate.y * 180 / .pi),
-            gyroZ: Float(motion.rotationRate.z * 180 / .pi)
+            gyroX: Float(rotationRate.x * 180 / .pi),
+            gyroY: Float(rotationRate.y * 180 / .pi),
+            gyroZ: Float(rotationRate.z * 180 / .pi)
         )
     }
 

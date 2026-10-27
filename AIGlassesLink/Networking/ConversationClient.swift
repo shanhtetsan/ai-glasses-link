@@ -74,7 +74,7 @@ final class ConversationClient: NSObject, URLSessionWebSocketDelegate, @unchecke
     var onAudio: (@Sendable (Data) -> Void)?
     var onError: (@Sendable (Error) -> Void)?
 
-    private let endpoint: URL
+    private var endpoint: URL
     private let queue = DispatchQueue(label: "com.aiglasses.link.conversation-client")
     private lazy var session = URLSession(
         configuration: .default,
@@ -84,7 +84,7 @@ final class ConversationClient: NSObject, URLSessionWebSocketDelegate, @unchecke
     private var task: URLSessionWebSocketTask?
     private var reconnectAttempt = 0
     private var reconnectWorkItem: DispatchWorkItem?
-    private var intentionallyDisconnected = false
+    private var intentionallyDisconnected = true
 
     init(endpoint: URL = defaultURL) {
         self.endpoint = endpoint
@@ -109,6 +109,21 @@ final class ConversationClient: NSObject, URLSessionWebSocketDelegate, @unchecke
             self.task = nil
             existingTask?.cancel(with: .normalClosure, reason: nil)
             self.onConnectionChange?(false)
+        }
+    }
+
+    func updateEndpoint(_ endpoint: URL) {
+        queue.async { [weak self] in
+            guard let self, self.endpoint != endpoint else { return }
+            self.endpoint = endpoint
+            guard !self.intentionallyDisconnected else { return }
+            self.reconnectWorkItem?.cancel()
+            self.reconnectWorkItem = nil
+            let oldTask = self.task
+            self.task = nil
+            oldTask?.cancel(with: .goingAway, reason: nil)
+            self.onConnectionChange?(false)
+            self.openIfNeeded()
         }
     }
 
