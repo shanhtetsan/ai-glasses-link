@@ -42,6 +42,7 @@
 		C00000000000000000000043 /* PhoneSensorClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001F /* PhoneSensorClient.swift */; };
 		C00000000000000000000044 /* PhoneImuPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000020 /* PhoneImuPacket.swift */; };
 		C00000000000000000000045 /* PhoneCaptureWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000021 /* PhoneCaptureWriter.swift */; };
+		C00000000000000000000059 /* JPEGSequenceStamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000002C /* JPEGSequenceStamp.swift */; };
 		C00000000000000000000046 /* PhoneCameraCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000022 /* PhoneCameraCapture.swift */; };
 		C00000000000000000000047 /* PhoneMotionCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000023 /* PhoneMotionCapture.swift */; };
 		C00000000000000000000048 /* PhoneCaptureCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000024 /* PhoneCaptureCoordinator.swift */; };
@@ -59,6 +60,7 @@
 		C00000000000000000000056 /* TrialsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000002A /* TrialsModel.swift */; };
 		C00000000000000000000057 /* TrialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000002B /* TrialsView.swift */; };
 		C00000000000000000000058 /* PhoneCaptureArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000016 /* PhoneCaptureArchiveTests.swift */; };
+		C0000000000000000000005A /* JPEGSequenceStampTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000017 /* JPEGSequenceStampTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,6 +106,7 @@
 		A0000000000000000000001F /* PhoneSensorClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSensorClient.swift; sourceTree = "<group>"; };
 		A00000000000000000000020 /* PhoneImuPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneImuPacket.swift; sourceTree = "<group>"; };
 		A00000000000000000000021 /* PhoneCaptureWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCaptureWriter.swift; sourceTree = "<group>"; };
+		A0000000000000000000002C /* JPEGSequenceStamp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JPEGSequenceStamp.swift; sourceTree = "<group>"; };
 		A00000000000000000000022 /* PhoneCameraCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCameraCapture.swift; sourceTree = "<group>"; };
 		A00000000000000000000023 /* PhoneMotionCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneMotionCapture.swift; sourceTree = "<group>"; };
 		A00000000000000000000024 /* PhoneCaptureCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCaptureCoordinator.swift; sourceTree = "<group>"; };
@@ -125,6 +128,7 @@
 		B00000000000000000000014 /* PhoneImuPacketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneImuPacketTests.swift; sourceTree = "<group>"; };
 		B00000000000000000000015 /* PhoneCaptureWriterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCaptureWriterTests.swift; sourceTree = "<group>"; };
 		B00000000000000000000016 /* PhoneCaptureArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCaptureArchiveTests.swift; sourceTree = "<group>"; };
+		B00000000000000000000017 /* JPEGSequenceStampTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JPEGSequenceStampTests.swift; sourceTree = "<group>"; };
 		F00000000000000000000001 /* AIGlassesLink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIGlassesLink.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F00000000000000000000002 /* AIGlassesLinkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AIGlassesLinkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -247,6 +251,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000021 /* PhoneCaptureWriter.swift */,
+				A0000000000000000000002C /* JPEGSequenceStamp.swift */,
 				A00000000000000000000022 /* PhoneCameraCapture.swift */,
 				A00000000000000000000023 /* PhoneMotionCapture.swift */,
 				A00000000000000000000024 /* PhoneCaptureCoordinator.swift */,
@@ -269,6 +274,7 @@
 				B00000000000000000000014 /* PhoneImuPacketTests.swift */,
 				B00000000000000000000015 /* PhoneCaptureWriterTests.swift */,
 				B00000000000000000000016 /* PhoneCaptureArchiveTests.swift */,
+				B00000000000000000000017 /* JPEGSequenceStampTests.swift */,
 			);
 			path = AIGlassesLinkTests;
 			sourceTree = "<group>";
@@ -441,6 +447,7 @@
 				C00000000000000000000043 /* PhoneSensorClient.swift in Sources */,
 				C00000000000000000000044 /* PhoneImuPacket.swift in Sources */,
 				C00000000000000000000045 /* PhoneCaptureWriter.swift in Sources */,
+				C00000000000000000000059 /* JPEGSequenceStamp.swift in Sources */,
 				C00000000000000000000046 /* PhoneCameraCapture.swift in Sources */,
 				C00000000000000000000047 /* PhoneMotionCapture.swift in Sources */,
 				C00000000000000000000048 /* PhoneCaptureCoordinator.swift in Sources */,
@@ -469,6 +476,7 @@
 				C00000000000000000000050 /* PhoneImuPacketTests.swift in Sources */,
 				C00000000000000000000051 /* PhoneCaptureWriterTests.swift in Sources */,
 				C00000000000000000000058 /* PhoneCaptureArchiveTests.swift in Sources */,
+				C0000000000000000000005A /* JPEGSequenceStampTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

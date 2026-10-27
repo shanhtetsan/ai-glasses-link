@@ -3,6 +3,7 @@ import Foundation
 final class PhoneCaptureCoordinator: @unchecked Sendable {
     var onFrameSaved: (@Sendable (Data, Int) -> Void)?
     var onFrameSent: (@Sendable () -> Void)?
+    var onFrameStampFailed: (@Sendable () -> Void)?
     var onIMUSaved: (@Sendable () -> Void)?
     var onConnectionChange: (@Sendable (Bool) -> Void)?
     var onError: (@Sendable (Error) -> Void)?
@@ -106,15 +107,41 @@ final class PhoneCaptureCoordinator: @unchecked Sendable {
         }
     }
 
+    /// Stamps the frame once; the saved copy and the wire message carry the same bytes.
+    static func makeFramePayloads(
+        jpeg: Data,
+        sequence: UInt64
+    ) throws -> (stamped: Data, wireMessage: Data) {
+        let stamped = try JPEGSequenceStamp.stamp(jpeg, sequence: sequence)
+        var message = Data([MessageType.camera.rawValue])
+        message.append(stamped)
+        return (stamped, message)
+    }
+
     private func handleFrame(_ jpeg: Data) {
         guard accepting else { return }
         frameSequence &+= 1
+        let payloads: (stamped: Data, wireMessage: Data)
         do {
-            try writer.saveFrame(jpeg, sequence: frameSequence)
-            onFrameSaved?(jpeg, writer.framesSaved)
-            var message = Data([MessageType.camera.rawValue])
-            message.append(jpeg)
-            sensorClient.send(message, kind: .frame)
+            payloads = try Self.makeFramePayloads(jpeg: jpeg, sequence: frameSequence)
+        } catch {
+            // Not a valid JPEG, so it is neither saved nor sent; record why.
+            onFrameStampFailed?()
+            do {
+                try writer.logFrameStampFailure(
+                    sequence: frameSequence,
+                    reason: error.localizedDescription,
+                    byteCount: jpeg.count
+                )
+            } catch {
+                onError?(error)
+            }
+            return
+        }
+        do {
+            try writer.saveFrame(payloads.stamped, sequence: frameSequence)
+            onFrameSaved?(payloads.stamped, writer.framesSaved)
+            sensorClient.send(payloads.wireMessage, kind: .frame)
         } catch {
             onError?(error)
         }

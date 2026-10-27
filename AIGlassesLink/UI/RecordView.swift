@@ -98,6 +98,7 @@ struct RecordView: View {
                 statusTile("Connected", connectedText)
                 statusTile("Elapsed", elapsedText)
                 statusTile("Frames local / sent", framesText)
+                statusTile("Stamp failures", stampFailuresText)
                     .gridCellColumns(2)
             }
         }
@@ -192,6 +193,10 @@ struct RecordView: View {
 
     private var framesText: String {
         model.source == .phone ? "\(model.framesSaved) / \(model.framesSent)" : "—"
+    }
+
+    private var stampFailuresText: String {
+        model.source == .phone ? "\(model.frameStampFailures)" : "—"
     }
 
     private var elapsedText: String {

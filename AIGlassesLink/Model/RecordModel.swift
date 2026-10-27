@@ -22,6 +22,7 @@ final class RecordModel: ObservableObject {
     @Published private(set) var elapsed: TimeInterval = 0
     @Published private(set) var framesSaved = 0
     @Published private(set) var framesSent = 0
+    @Published private(set) var frameStampFailures = 0
     @Published private(set) var lastError: String?
 
     let backendSettings: BackendSettings
@@ -58,6 +59,7 @@ final class RecordModel: ObservableObject {
         lastError = nil
         framesSaved = 0
         framesSent = 0
+        frameStampFailures = 0
         phonePreview = nil
         let buttonTime = DispatchTime.now().uptimeNanoseconds
         var openedServerTrial = false
@@ -157,6 +159,9 @@ final class RecordModel: ObservableObject {
         }
         coordinator.onFrameSent = { [weak self] in
             Task { @MainActor in self?.framesSent += 1 }
+        }
+        coordinator.onFrameStampFailed = { [weak self] in
+            Task { @MainActor in self?.frameStampFailures += 1 }
         }
         coordinator.onIMUSaved = { [weak self] in
             Task { @MainActor in self?.imuRate.record() }

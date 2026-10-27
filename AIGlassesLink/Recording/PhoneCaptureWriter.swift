@@ -137,6 +137,13 @@ final class PhoneCaptureWriter: @unchecked Sendable {
         try appendJSONLine(object, to: phoneHandle)
     }
 
+    func logFrameStampFailure(sequence: UInt64, reason: String, byteCount: Int) throws {
+        try logPhoneEvent(
+            "frame_stamp_failure",
+            details: ["seq": sequence, "error": reason, "bytes": byteCount]
+        )
+    }
+
     func close() {
         lock.lock()
         defer { lock.unlock() }
